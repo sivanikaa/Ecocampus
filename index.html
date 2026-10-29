@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EcoCampus — Smart Campus E-Waste Management System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--g:#237A57;--dg:#18352A;--lg:#E8F7ED;--bg:#F7FAF7;--bd:#DCE8DF;--tx:#24332b;--mu:#6b7d73}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--tx);display:flex;min-height:100vh}
+button,input,select,textarea{font:inherit}
+/* Sidebar */
+.side{width:240px;background:var(--dg);color:#fff;padding:22px 14px;position:fixed;top:0;bottom:0;display:flex;flex-direction:column;gap:6px;z-index:20;transition:transform .25s}
+.brand{font-size:1.25rem;font-weight:700;padding:0 10px 4px}.brand small{display:block;font-size:.7rem;font-weight:400;opacity:.7;margin-top:2px}
+.nav{background:none;border:0;color:#cfe3d6;text-align:left;padding:11px 12px;border-radius:10px;cursor:pointer;display:flex;gap:10px;transition:.15s}
+.nav:hover{background:rgba(255,255,255,.08)}.nav.on{background:var(--g);color:#fff}
+.side .reset{margin-top:auto;background:none;border:1px solid rgba(255,255,255,.3);color:#cfe3d6;padding:9px;border-radius:10px;cursor:pointer}
+.side .reset:hover{background:rgba(255,255,255,.1)}
+main{margin-left:240px;flex:1;padding:26px;max-width:1250px;min-width:0}
+.menu{display:none;background:var(--dg);color:#fff;border:0;border-radius:8px;padding:8px 12px;margin-bottom:14px;cursor:pointer}
+section{display:none}section.on{display:block}
+h1{font-size:1.6rem;color:var(--dg)}h2{font-size:1.05rem;color:var(--dg);margin-bottom:12px}
+.sub{color:var(--mu);margin:4px 0 20px}
+/* Cards */
+.card{background:#fff;border:1px solid var(--bd);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(24,53,42,.05)}
+.banner{background:var(--dg);color:#fff;border-radius:18px;padding:26px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.banner h1{color:#fff}.banner p{opacity:.8;margin-top:6px}
+.grid{display:grid;gap:14px;margin-bottom:20px}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g2{grid-template-columns:1fr 1fr}
+.stat{transition:.15s}.stat:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(24,53,42,.1)}
+.stat .ic{width:36px;height:36px;border-radius:10px;background:var(--lg);display:grid;place-items:center;margin-bottom:10px}
+.stat b{font-size:1.5rem;color:var(--dg);display:block}.stat span{color:var(--mu);font-size:.85rem}
+.btn{background:var(--g);color:#fff;border:0;padding:11px 20px;border-radius:10px;cursor:pointer;font-weight:600;transition:.15s}
+.btn:hover{background:#1c6447}.btn.alt{background:#fff;color:var(--g);border:1px solid var(--g)}.btn.alt:hover{background:var(--lg)}
+.banner .btn{background:#fff;color:var(--dg)}.banner .btn:hover{background:var(--lg)}
+.chartbox{position:relative;height:290px}
+.tag{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:20px;background:#fff3cd;color:#7a5b00;margin-left:6px}
+/* Tables */
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.9rem}
+th{text-align:left;color:var(--mu);font-weight:600;padding:10px;border-bottom:1px solid var(--bd);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid #eef3ee;white-space:nowrap}tr:hover td{background:#fbfdfb}tr.new td{background:var(--lg)}
+.badge{padding:3px 10px;border-radius:20px;font-size:.78rem;font-weight:600}
+.s0{background:#fff3cd;color:#7a5b00}.s1{background:#dbeafe;color:#1e4a8c}.s2{background:#ede4fb;color:#5b34a3}.s3{background:#d4f1de;color:#14663f}
+.pHigh{color:#b3261e;font-weight:600}.pMedium{color:#a06a00;font-weight:600}.pLow{color:var(--g);font-weight:600}
+.empty{text-align:center;padding:40px;color:var(--mu)}
+/* Forms */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form .full{grid-column:1/-1}
+label{font-size:.85rem;font-weight:600;display:block;margin-bottom:5px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cdd9d0;border-radius:10px;background:#fff}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--g);border-color:var(--g)}
+.err{border-color:#b3261e!important}
+.filters{display:grid;grid-template-columns:2fr repeat(4,1fr) auto;gap:10px;margin-bottom:14px}
+td select{padding:6px;width:auto;font-weight:600;border:0;border-radius:20px}
+/* Insights */
+.ins{border-left:5px solid var(--g);margin-bottom:14px}.ins.High{border-color:#b3261e}.ins.Medium{border-color:#e0a100}.ins.Good{border-color:var(--g)}
+.ins h3{display:flex;justify-content:space-between;gap:10px;font-size:1rem;color:var(--dg);margin-bottom:6px}
+.ins .act{margin-top:8px;background:var(--lg);padding:8px 12px;border-radius:8px;font-size:.9rem}
+.pill{font-size:.72rem;padding:3px 10px;border-radius:20px;background:var(--lg);color:var(--g);font-weight:700;white-space:nowrap;height:fit-content}
+.ins.High .pill{background:#fde4e2;color:#b3261e}.ins.Medium .pill{background:#fff3cd;color:#7a5b00}
+#toast{position:fixed;right:20px;bottom:20px;background:var(--dg);color:#fff;padding:13px 20px;border-radius:12px;opacity:0;transform:translateY(20px);transition:.3s;z-index:50;pointer-events:none;max-width:320px}
+#toast.show{opacity:1;transform:none}
+@media(max-width:900px){.side{transform:translateX(-100%)}.side.open{transform:none}main{margin-left:0;padding:16px}.menu{display:block}
+.g3,.g4,.g2,.form{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.g3,.g4,.g2,.form,.filters{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<aside class="side" id="side">
+  <div class="brand">🌿 EcoCampus<small>Track. Collect. Recycle.</small></div>
+  <button class="nav on" data-s="dash">📊 Dashboard</button>
+  <button class="nav" data-s="report">📝 Report E-Waste</button>
+  <button class="nav" data-s="track">🚚 Collection Tracker</button>
+  <button class="nav" data-s="analytics">♻️ Recycling Analytics</button>
+  <button class="nav" data-s="insights">💡 Smart Insights</button>
+  <button class="reset" id="resetBtn">Reset Demo Data</button>
+</aside>
+
+<main>
+<button class="menu" id="menuBtn">☰ Menu</button>
+
+<!-- 1. DASHBOARD -->
+<section id="dash" class="on">
+  <div class="banner">
+    <div><h1>Welcome to EcoCampus</h1><p>Track. Collect. Recycle. Build a Greener Campus. <span class="tag" id="demoTag">Demo data</span></p></div>
+    <button class="btn" data-go="report">+ Report E-Waste</button>
+  </div>
+  <div class="grid g3" id="dashStats"></div>
+  <div class="grid g2">
+    <div class="card"><h2>Generated vs Recycling-Confirmed by Location (kg)</h2><div class="chartbox"><canvas id="cLoc"></canvas></div></div>
+    <div class="card"><h2>E-Waste by Category (kg)</h2><div class="chartbox"><canvas id="cCat"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="margin:0">Recent Reports</h2><button class="btn alt" data-go="track">Open Collection Tracker</button></div>
+    <div class="tw"><table><thead><tr><th>ID</th><th>Category</th><th>Location</th><th>Weight</th><th>Date</th><th>Status</th></tr></thead><tbody id="recent"></tbody></table></div>
+  </div>
+</section>
+
+<!-- 2. REPORT -->
+<section id="report">
+  <h1>Report E-Waste</h1><p class="sub">Submit a new e-waste report. It will start with the status "Reported".</p>
+  <form class="card form" id="form" novalidate>
+    <div><label>Campus location *</label><select id="fLoc"></select></div>
+    <div><label>E-waste category *</label><select id="fCat"></select></div>
+    <div><label>Number of items *</label><input type="number" id="fItems" min="1" step="1" placeholder="e.g. 10"></div>
+    <div><label>Estimated total weight (kg) *</label><input type="number" id="fWeight" min="0.1" step="0.1" placeholder="e.g. 4.5"></div>
+    <div><label>Item condition *</label><select id="fCond"><option value="">Select…</option><option>Working</option><option>Damaged</option><option>Dead / Non-functional</option></select></div>
+    <div><label>Priority *</label><select id="fPri"><option value="">Select…</option><option>High</option><option>Medium</option><option>Low</option></select></div>
+    <div><label>Reporter name *</label><input id="fName" placeholder="Your name"></div>
+    <div><label>Date reported *</label><input type="date" id="fDate"></div>
+    <div class="full"><label>Additional notes</label><textarea id="fNotes" rows="3" placeholder="Optional details"></textarea></div>
+    <div class="full" style="display:flex;gap:10px"><button type="submit" class="btn">Submit Report</button><button type="button" class="btn alt" id="clearBtn">Clear Form</button></div>
+  </form>
+</section>
+
+<!-- 3. TRACKER -->
+<section id="track">
+  <h1>Collection Tracker</h1><p class="sub">Search, filter and update the lifecycle status of each report.</p>
+  <div class="card">
+    <div class="filters">
+      <input id="q" placeholder="Search ID, category or location…">
+      <select id="xLoc"></select><select id="xCat"></select><select id="xStat"></select><select id="xPri"></select>
+      <button class="btn alt" id="xClear">Clear</button>
+    </div>
+    <div class="tw"><table><thead><tr><th>ID</th><th>Category</th><th>Location</th><th>Items</th><th>Weight</th><th>Date</th><th>Priority</th><th>Status</th></tr></thead><tbody id="trackBody"></tbody></table></div>
+    <div class="empty" id="trackEmpty" style="display:none">No reports match your search or filters.</div>
+  </div>
+</section>
+
+<!-- 4. ANALYTICS -->
+<section id="analytics">
+  <h1>Recycling Analytics</h1><p class="sub">Calculated live from all report records.</p>
+  <div class="grid g4" id="anStats"></div>
+  <div class="grid g2">
+    <div class="card"><h2>Waste by Lifecycle Stage (kg)</h2><div class="chartbox"><canvas id="cStage"></canvas></div></div>
+    <div class="card"><h2>Stages by Location (kg)</h2><div class="chartbox"><canvas id="cStageLoc"></canvas></div></div>
+  </div>
+  <div class="card" style="font-size:.88rem;color:var(--mu)">
+    <b>Formulas:</b> Collection Rate = Collected ÷ Generated × 100 · Recycling Rate = Confirmed ÷ Collected × 100 · Coverage = Confirmed ÷ Generated × 100.<br>
+    "Collected" and "Sent for Recycling" include reports that have progressed to later stages. Only "Recycling Confirmed" counts as recycled.
+  </div>
+</section>
+
+<!-- 5. INSIGHTS -->
+<section id="insights">
+  <h1>Smart Insights</h1><p class="sub">Transparent rule-based analysis of current records (no AI model is connected).</p>
+  <div id="insList"></div>
+</section>
+</main>
+<div id="toast"></div>
+
+<script>
+/* ========= CONFIG & DATA ========= */
+const KEY='ecocampus_reports_v1';
+const LOCS=['Computer Lab','Student Hostel','Administrative Office','Electronics Workshop','Library'];
+const CATS=['Batteries','Keyboards and Mice','Monitors','Chargers and Cables','Mobile Phones','Circuit Boards','Other Electronics'];
+const STAT=['Reported','Collected','Sent for Recycling','Recycling Confirmed'];
+const PRI=['High','Medium','Low'];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const kg=n=>(Math.round(n*10)/10).toLocaleString()+' kg';
+const pct=(a,b)=>b>0?(a/b*100):0;
+const pf=n=>n.toFixed(1)+'%';
+const today=()=>new Date().toISOString().slice(0,10);
+const ago=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10)};
+
+// Fictional demonstration records (flagged demo:true)
+function seed(){
+  const s=[ // [loc,cat,items,kg,cond,pri,name,daysAgo,status]
+    [0,2,6,48,'Dead / Non-functional','Medium','Demo Staff A',40,3],[0,1,25,12.5,'Damaged','Low','Demo Staff A',36,3],
+    [1,0,40,9,'Dead / Non-functional','High','Demo Student B',33,3],[3,5,30,7.5,'Damaged','Medium','Demo Staff C',28,2],
+    [2,3,50,14,'Working','Low','Demo Staff D',25,2],[4,6,8,16,'Damaged','Low','Demo Staff E',20,2],
+    [0,2,4,32,'Dead / Non-functional','High','Demo Staff A',14,1],[1,4,15,6,'Damaged','Medium','Demo Student F',12,1],
+    [3,0,22,5.5,'Dead / Non-functional','High','Demo Staff C',9,0],[0,3,35,10,'Damaged','Medium','Demo Staff A',6,0],
+    [2,6,5,11,'Damaged','Low','Demo Staff D',3,0],[1,1,18,8,'Damaged','High','Demo Student B',1,0]];
+  const r=s.map((x,i)=>({id:'EC-'+(1001+i),loc:LOCS[x[0]],cat:CATS[x[1]],items:x[2],kg:x[3],cond:x[4],pri:x[5],name:x[6],date:ago(x[7]),notes:'',status:STAT[x[8]],demo:true}));
+  try{localStorage.setItem(KEY,JSON.stringify(r))}catch(e){}
+  return r;
+}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(Array.isArray(d))return d}catch(e){}return seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(R))}catch(e){}}
+let R=load(), lastId=null;
+
+/* ========= CALCULATIONS (single source of truth) ========= */
+function stats(list=R){
+  const sum=f=>list.filter(f).reduce((a,r)=>a+Number(r.kg),0), idx=r=>STAT.indexOf(r.status);
+  const s={gen:sum(()=>true),col:sum(r=>idx(r)>=1),sent:sum(r=>idx(r)>=2),conf:sum(r=>idx(r)==3),pend:sum(r=>idx(r)==0),wait:sum(r=>idx(r)==2)};
+  s.cr=pct(s.col,s.gen);s.rr=pct(s.conf,s.col);s.cov=pct(s.conf,s.gen);return s;
+}
+const byLoc=()=>LOCS.map(l=>stats(R.filter(r=>r.loc==l)));
+
+/* ========= CHARTS ========= */
+const charts={};
+function draw(id,cfg){
+  if(typeof Chart==='undefined'){return}
+  if(charts[id])charts[id].destroy();
+  cfg.options=Object.assign({responsive:true,maintainAspectRatio:false},cfg.options||{});
+  charts[id]=new Chart($(id),cfg);
+}
+const PAL=['#237A57','#7CC4A0','#F2B84B','#6FA8DC','#B79AE0','#E58E8E','#9AA9A0'];
+
+/* ========= RENDER ========= */
+const card=(ic,v,l)=>`<div class="card stat"><div class="ic">${ic}</div><b>${v}</b><span>${l}</span></div>`;
+function renderDash(){
+  const s=stats();
+  $('dashStats').innerHTML=card('🗑️',kg(s.gen),'Total E-Waste Generated')+card('📦',kg(s.col),'Total E-Waste Collected')+card('♻️',kg(s.conf),'Total E-Waste Recycled')
+    +card('⏳',kg(s.pend),'Pending Collection')+card('📈',pf(s.cr),'Collection Rate')+card('🌍',pf(s.cov),'Recycling Coverage');
+  $('demoTag').style.display=R.some(r=>r.demo)?'inline-block':'none';
+  const L=byLoc();
+  draw('cLoc',{type:'bar',data:{labels:LOCS,datasets:[{label:'Generated',data:L.map(x=>x.gen),backgroundColor:'#7CC4A0'},{label:'Recycling Confirmed',data:L.map(x=>x.conf),backgroundColor:'#237A57'}]}});
+  draw('cCat',{type:'doughnut',data:{labels:CATS,datasets:[{data:CATS.map(c=>R.filter(r=>r.cat==c).reduce((a,r)=>a+Number(r.kg),0)),backgroundColor:PAL}]},options:{plugins:{legend:{position:'right'}}}});
+  const rec=[...R].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id,undefined,{numeric:true})).slice(0,6);
+  $('recent').innerHTML=rec.length?rec.map(r=>`<tr><td><b>${esc(r.id)}</b>${r.demo?'<span class="tag">demo</span>':''}</td><td>${esc(r.cat)}</td><td>${esc(r.loc)}</td><td>${kg(+r.kg)}</td><td>${esc(r.date)}</td><td>${badge(r.status)}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No reports yet.</td></tr>';
+}
+const badge=st=>`<span class="badge s${STAT.indexOf(st)}">${esc(st)}</span>`;
+
+function renderTracker(){
+  const q=$('q').value.trim().toLowerCase(),l=$('xLoc').value,c=$('xCat').value,st=$('xStat').value,p=$('xPri').value;
+  const rows=R.filter(r=>(!q||[r.id,r.cat,r.loc].some(v=>v.toLowerCase().includes(q)))&&(!l||r.loc==l)&&(!c||r.cat==c)&&(!st||r.status==st)&&(!p||r.pri==p))
+    .sort((a,b)=>b.id.localeCompare(a.id,undefined,{numeric:true}));
+  $('trackBody').innerHTML=rows.map(r=>`<tr class="${r.id==lastId?'new':''}"><td><b>${esc(r.id)}</b></td><td>${esc(r.cat)}</td><td>${esc(r.loc)}</td><td>${r.items}</td><td>${kg(+r.kg)}</td><td>${esc(r.date)}</td><td class="p${r.pri}">${esc(r.pri)}</td>
+    <td><select class="badge s${STAT.indexOf(r.status)}" onchange="setStatus('${r.id}',this.value)">${STAT.map(s=>`<option ${s==r.status?'selected':''}>${s}</option>`).join('')}</select></td></tr>`).join('');
+  $('trackEmpty').style.display=rows.length?'none':'block';
+}
+
+function renderAnalytics(){
+  const s=stats();
+  $('anStats').innerHTML=card('🗑️',kg(s.gen),'Total Generated')+card('📦',kg(s.col),'Total Collected')+card('♻️',kg(s.conf),'Recycling-Confirmed')+card('📈',pf(s.cr),'Collection Rate')
+    +card('🔁',pf(s.rr),'Recycling Rate')+card('🌍',pf(s.cov),'Recycling Coverage')+card('⏳',kg(s.pend),'Awaiting Collection')+card('🕒',kg(s.wait),'Awaiting Recycling Confirmation');
+  draw('cStage',{type:'bar',data:{labels:['Generated','Collected','Sent for Recycling','Recycling Confirmed'],datasets:[{data:[s.gen,s.col,s.sent,s.conf],backgroundColor:['#9AA9A0','#6FA8DC','#B79AE0','#237A57']}]},options:{plugins:{legend:{display:false}}}});
+  const L=byLoc();
+  draw('cStageLoc',{type:'bar',data:{labels:LOCS,datasets:[['Generated','gen','#CFE3D6'],['Collected','col','#6FA8DC'],['Sent','sent','#B79AE0'],['Confirmed','conf','#237A57']].map(d=>({label:d[0],data:L.map(x=>x[d[1]]),backgroundColor:d[2]}))}});
+}
+
+function renderInsights(){
+  const s=stats(),out=[];
+  const pend=R.filter(r=>r.status==STAT[0]),wait=R.filter(r=>r.status==STAT[2]),hi=pend.filter(r=>r.pri=='High');
+  if(pend.length)out.push({t:'Collection Alert',p:hi.length?'High':'Medium',d:`${pend.length} report(s) totalling ${kg(s.pend)} are awaiting collection (${pf(pct(s.pend,s.gen))} of all generated waste).`,a:'Schedule a collection run and mark reports as Collected once picked up.'});
+  if(wait.length)out.push({t:'Recycling Confirmation',p:'Medium',d:`${wait.length} report(s) totalling ${kg(s.wait)} were sent for recycling but have no confirmation yet.`,a:'Contact the recycler for a receipt or certificate, then set the status to Recycling Confirmed.'});
+  if(s.gen>0){const L=byLoc(),m=Math.max(...L.map(x=>x.gen)),i=L.findIndex(x=>x.gen==m);
+    out.push({t:'Campus Hotspot',p:'Low',d:`${LOCS[i]} has the highest reported e-waste: ${kg(m)} (${pf(pct(m,s.gen))} of the total).`,a:`Place a dedicated e-waste bin and run an awareness drive in ${LOCS[i]}.`});}
+  if(hi.length)out.push({t:'Priority Handling',p:'High',d:`${hi.length} high-priority report(s) (${kg(hi.reduce((a,r)=>a+Number(r.kg),0))}) are still awaiting collection: ${hi.map(r=>r.id).join(', ')}.`,a:'Collect these first, especially damaged batteries, which are a safety risk.'});
+  out.push({t:'Verified Recycling',p:'Good',d:s.conf>0?`${kg(s.conf)} of e-waste is verified as recycled, a recycling coverage of ${pf(s.cov)}.`:'No waste has been recycling-confirmed yet.',a:s.conf>0?'Keep confirmation records for sustainability reporting.':'Move collected waste through recycling and confirm it to build verified impact.'});
+  if(!pend.length&&!wait.length)out.unshift({t:'All Clear 🎉',p:'Good',d:'No pending alerts. Every reported item is collected and recycling is confirmed.',a:'Keep up the good work and encourage new reports.'});
+  $('insList').innerHTML=out.map(i=>`<div class="card ins ${i.p}"><h3>${i.t}<span class="pill">${i.p=='Good'?'✓ Positive':i.p+' priority'}</span></h3><p>${i.d}</p><div class="act"><b>Recommended action:</b> ${i.a}</div></div>`).join('');
+}
+function renderAll(){renderDash();renderTracker();renderAnalytics();renderInsights()}
+
+/* ========= ACTIONS ========= */
+function setStatus(id,v){const r=R.find(x=>x.id==id);if(!r)return;r.status=v;save();renderAll();toast(`${id} → ${v}`)}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2800)}
+function show(id){
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==id));
+  document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('on',n.dataset.s==id));
+  $('side').classList.remove('open');window.scrollTo(0,0);
+  renderAll(); // re-render so charts size correctly when shown
+}
+function nextId(){return 'EC-'+(Math.max(1000,...R.map(r=>parseInt(r.id.slice(3))||0))+1)}
+
+function clearForm(){$('form').reset();$('fDate').value=today();document.querySelectorAll('.err').forEach(e=>e.classList.remove('err'))}
+
+$('form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const f={loc:$('fLoc').value,cat:$('fCat').value,items:$('fItems').value,kg:$('fWeight').value,cond:$('fCond').value,pri:$('fPri').value,name:$('fName').value.trim(),date:$('fDate').value};
+  const ids={loc:'fLoc',cat:'fCat',items:'fItems',kg:'fWeight',cond:'fCond',pri:'fPri',name:'fName',date:'fDate'};
+  let bad=[];
+  for(const k in ids){const el=$(ids[k]);let ok=!!f[k];
+    if(k=='items')ok=Number.isInteger(+f.items)&&+f.items>=1;
+    if(k=='kg')ok=+f.kg>0;
+    el.classList.toggle('err',!ok);if(!ok)bad.push(k)}
+  if(bad.length){toast('Please fill all required fields correctly.');return}
+  const r={id:nextId(),loc:f.loc,cat:f.cat,items:+f.items,kg:+f.kg,cond:f.cond,pri:f.pri,name:f.name,date:f.date,notes:$('fNotes').value.trim(),status:STAT[0]};
+  R.push(r);save();lastId=r.id;
+  // reset tracker filters so the new report is visible
+  $('q').value='';['xLoc','xCat','xStat','xPri'].forEach(i=>$(i).value='');
+  clearForm();show('track');toast(`Report ${r.id} submitted successfully!`);
+});
+$('clearBtn').onclick=clearForm;
+$('resetBtn').onclick=()=>{if(confirm('Reset all data back to the demo records? Your own reports will be deleted.')){R=seed();lastId=null;renderAll();show('dash');toast('Demo data restored.')}};
+$('xClear').onclick=()=>{$('q').value='';['xLoc','xCat','xStat','xPri'].forEach(i=>$(i).value='');lastId=null;renderTracker()};
+['q','xLoc','xCat','xStat','xPri'].forEach(i=>$(i).addEventListener('input',renderTracker));
+document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>show(n.dataset.s));
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
+$('menuBtn').onclick=()=>$('side').classList.toggle('open');
+
+/* ========= INIT ========= */
+const opts=(a,first)=>(first?`<option value="">${first}</option>`:'')+a.map(x=>`<option>${x}</option>`).join('');
+$('fLoc').innerHTML=opts(LOCS,'Select…');$('fCat').innerHTML=opts(CATS,'Select…');
+$('xLoc').innerHTML=opts(LOCS,'All locations');$('xCat').innerHTML=opts(CATS,'All categories');
+$('xStat').innerHTML=opts(STAT,'All statuses');$('xPri').innerHTML=opts(PRI,'All priorities');
+$('fDate').value=today();
+renderAll();
+</script>
+</body>
+</html>
